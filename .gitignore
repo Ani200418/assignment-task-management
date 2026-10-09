@@ -1,0 +1,28 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+client_secret*.json
+credentials*.json
+token.json
+# node / next
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+# misc
+.DS_Store
+.idea/
+.vscode/
+.vercel/
+supabase/.temp/
