@@ -1,0 +1,3 @@
+# Only needed for scripts/test_migrations.py (embedded PostgreSQL for migration tests)
+pgserver>=0.1.4
+psycopg[binary]>=3.2
