@@ -34,7 +34,7 @@ Planned hosting: Vercel (frontend), Render or Railway (API), Supabase (DB/Auth).
 flowchart LR
   U[Browser<br/>Next.js + TypeScript] -->|1 sign in with Google| SA[Supabase Auth]
   SA <-->|OAuth 2.0| G[Google]
-  U -->|2 REST + Bearer token| F[Flask API]
+  U -->|"2 REST + Bearer token"| F[Flask API]
   F -->|3 verify JWT via public JWKS| SA
   F -->|4 service-role queries + SQL functions| DB[(Supabase PostgreSQL)]
   DB --- OB[(notification_outbox)]
@@ -54,7 +54,7 @@ sequenceDiagram
   G->>S: callback with code
   S->>B: redirect /auth/callback?code=...
   B->>S: exchange code for session (PKCE)
-  B->>F: GET /api/me  (Authorization: Bearer access_token)
+  B->>F: GET /api/me (Authorization: Bearer access_token)
   F->>S: fetch public keys (JWKS, cached)
   F->>F: verify signature, iss, aud, exp; take user id from "sub"
   F-->>B: profile
@@ -102,7 +102,8 @@ flask --app wsgi run --port 5000   # or: gunicorn wsgi:app -b 127.0.0.1:5000
 cd ../frontend && cp .env.example .env.local   # fill in values
 npm install && npm run dev                        # http://localhost:3000
 ```
-Environment variables are explained inline in `backend/.env.example` and `frontend/.env.example`.
+Environment variables are explained inline in `backend/.env.example` and `frontend/.env.example`. `GEMINI_API_KEY`, SMTP credentials,
+WhatsApp tokens, Supabase service credentials, and cron secrets are backend-only; never place them in `NEXT_PUBLIC_*` variables.
 Only `NEXT_PUBLIC_*` values are visible to browsers. `SUPABASE_SERVICE_ROLE_KEY`, `GMAIL_*`, `CRON_SECRET` exist **only** on the backend.
 
 ## Tests
@@ -132,6 +133,19 @@ See [`docs/STATUS.md`](docs/STATUS.md) (limitations) and below.
 
 ## Screenshots
 *None yet - capture them after your first real run and add them under `docs/screenshots/`.*
+
+## AI automation
+The Automation page provides a real draft-to-publish flow. Published agents match events submitted to
+`POST /api/agents/events`, resolve configured recipients, render `{{payload.path}}` placeholders, call configured providers,
+and persist run/delivery history. Disabled agents are skipped. Duplicate event deliveries are prevented by a database unique key.
+Gemini assistance uses the official `google-genai` SDK from the backend and all returned configuration is validated server-side.
+Email uses SMTP and WhatsApp uses the WhatsApp Business Cloud API; credentials are optional and failed/missing configuration is
+reported honestly rather than shown as successful delivery.
+
+DSC/license scheduled checks require an upstream system to ingest records as `dsc.expiring` or `license.expiring` events.
+This repository has no Turia live database/API access, so it does not invent that integration. A production scheduler should call
+the protected internal endpoint after the upstream adapter has emitted date-based events; expiry boundaries are evaluated by that adapter.
+See [`AUDIT_REPORT.md`](AUDIT_REPORT.md) for the current verification and limitations.
 
 ## Future improvements
 Search in assignee picker · server-side counts via SQL view · real queue/worker · optimistic concurrency (`updated_at` check) · Playwright E2E tests · in-app notifications · team/workspace scoping.
