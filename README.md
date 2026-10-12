@@ -54,9 +54,9 @@ sequenceDiagram
   G->>S: callback with code
   S->>B: redirect /auth/callback?code=...
   B->>S: exchange code for session (PKCE)
-  B->>F: GET /api/me (Authorization: Bearer access_token)
+  B->>F: GET /api/me with bearer access token
   F->>S: fetch public keys (JWKS, cached)
-  F->>F: verify signature, iss, aud, exp; take user id from "sub"
+  F->>F: verify JWT claims and read user id from sub claim
   F-->>B: profile
 ```
 ### Task creation & notification flow
